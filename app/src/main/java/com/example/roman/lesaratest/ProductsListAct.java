@@ -1,5 +1,6 @@
 package com.example.roman.lesaratest;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -19,7 +20,9 @@ public class ProductsListAct extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private ProductsAdapter mAdapter;
+    private GridLayoutManager mLayoutManager;
     private ProgressBar mProgressBar;
+    private int spansCount = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,19 +41,19 @@ public class ProductsListAct extends AppCompatActivity {
         });
 
         mAdapter = new ProductsAdapter();
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
-        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+        mLayoutManager = new GridLayoutManager(this, spansCount);
+        mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
                 if (mAdapter.getItemViewType(position) == ProductsAdapter.REGULAR) {
                     return 1;
                 } else {
-                    return 2;
+                    return spansCount;
                 }
             }
         });
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
         mProgressBar = (ProgressBar) findViewById(R.id.progress);
@@ -60,6 +63,19 @@ public class ProductsListAct extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         getSupportLoaderManager().initLoader(0, null, loaderCallbacks);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            spansCount = 3;
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            spansCount = 2;
+        }
+        mLayoutManager.setSpanCount(spansCount);
     }
 
     private LoaderManager.LoaderCallbacks<ListDataModel> loaderCallbacks = new LoaderManager.LoaderCallbacks<ListDataModel>() {
